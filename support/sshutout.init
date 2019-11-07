@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# sshutout	This shell script takes care of starting and stopping sshutout.
+#
+# chkconfig: 2345 55 45
+# description: sshutout - A Daemon to Stop SSH Dictionary Attacks.
+# probe: false
+# processname: sshutout
+# pidfile: /var/run/sshutout.pid
+# config: /etc/sshutout.conf
+# config: /etc/sysconfig/sshutout
+### BEGIN INIT INFO
+# Provides: sshutout
+# Required-Start: sshd
+# Required-Stop: sshd
+# Default-Start: 2 3 4 5
+# Short-Description: A Daemon to Stop SSH Dictionary Attacks
+# Description: A Daemon to Stop SSH Dictionary Attacks.
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ "${NETWORKING}" = "no" ] && exit 0
+
+[ -f /etc/sshutout.conf ] || exit 0
+
+[ -f /usr/sbin/sshutout ] || exit 0
+
+[ -f /etc/sysconfig/sshutout ] && . /etc/sysconfig/sshutout
+
+# See how we were called.
+case "$1" in
+start)
+	echo -n "Starting sshutout: "
+	daemon sshutout ${SSHUTOUT_OPTIONS:-""}
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/sshutout
+	;;
+stop)
+	echo -n "Stopping sshutout: "
+	killproc sshutout
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/sshutout /var/run/sshutout.pid
+	;;
+status)
+	status sshutout
+	RETVAL=$?
+	;;
+restart|reload)
+	$0 stop
+	$0 start
+	RETVAL=$?
+	;;
+condrestart)
+	[ -f /var/lock/subsys/sshutout ] && restart
+	RETVAL=$?
+	;;
+  *)
+	echo "Usage: sshutout {start|stop|status|restart|condrestart|reload}"
+	exit 1
+esac
+
+exit $RETVAL

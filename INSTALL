@@ -1,0 +1,37 @@
+The sshutout daemon is fairly simple to install provided you have a GCC toolchain
+that is suitable for building binaries for your target system. To build the
+binary, run the following commands:
+
+	$ su -
+	# tar -xzvf sshutout-1.0.6.tar.gz
+	# cd sshutout-1.0.6
+	# make
+	# make install
+
+The installation process will place three new files onto your system. These are:
+
+	/usr/local/sbin/sshutout
+	/usr/man/man8/sshutout.8
+	/etc/sshutout.conf
+
+The first file is the executable binary for the daemon. The second file is a man
+page, and the third file is a sample configuration file. These three files may be
+copied to other systems as needed to effect additional installations assuming
+the processor architecture and object libraries are compatible.
+
+To complete the installation, you will need to edit your system startup scripts and add
+a line or two to invoke the sshutout daemon. For example, insert the following lines
+just after the invocation of sshd:
+
+	if [ -x /usr/local/sbin/sshutout ]; then
+	   rm -f /var/run/sshutout.pid
+	   /usr/local/sbin/sshutout
+	fi
+
+You should also customize the configuration file:
+
+	/etc/sshutout.conf
+
+to reflect your target system's particular needs. It is especially important to make sure that the
+"sshd_log_file" parameter is set to the proper path. After customization, you may either
+invoke sshutout directly (as root), or you may reboot your system.

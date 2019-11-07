@@ -1,0 +1,10 @@
+FILES		  - This file
+License           - The GPL
+Makefile          - Makefile for GNU make
+README            - Brief introductory material
+INSTALL		  - Quick installation instructions
+TODO              - Possible enhancements
+sshutout.c	  - The source code for the sshutout daemon
+sshutout.8	  - The man page for the daemon
+sshutout.html     - Web browser friendly documentation
+sshutout.conf     - Sample configuration file

@@ -1,0 +1,4 @@
+To build the sshutout binary on your Linux workstation, simply run 'make'.
+Better yet, consult the file, INSTALL, to better understand your options.
+Finally, there is a wealth of doc in sshutout.html. Point your browser at
+it.

@@ -1,0 +1,210 @@
+.TH SSHUTOUT 8 "05 December 2009"
+.SH NAME
+sshutout \- A Daemon to Stop SSH Dictionary Attacks
+.SH SYNOPSIS
+\fBsshutout\fP \fI[-d delay] [-f config_file] [-i poll_interval]\fP
+.ti 2i
+\fI[-l input_log_file] [-p pid_file] [-s output_log_file]\fP
+.ti 2i
+\fI[-t threshold] [-w host_list] [-?] [-2] [-D] [-e] [-u]\fP
+.SH DESCRIPTION
+.P
+\fBsshutout\fP is a Linux daemon that periodically monitors log files 
+looking for multiple failed login attempts via the Secure Shell daemon (sshd, or 
+optionally, sshd2). The daemon is meant to mitigate what are commonly known as 
+a "dictionary attacks," i.e. scripted brute force attacks that use lists of 
+user ID's and passwords to effect unauthorized intrusions. Typically such attacks 
+fill the system logs with hundreds or even thousands of log entries for the failed 
+login attempts. Aside from the nuisance of wasted space, wasted bandwidth, and 
+reduced signal to noise ratio in the logs, the attacks can pose a real danger to 
+systems with weak ID and password combinations.
+.P
+The sshutout daemon blunts such attacks by creating firewall rules to block individual 
+offenders from accessing the system. These rules are created when an attack signature 
+is detected, and after a configurable expiry interval has elapsed, the rules are deleted.
+.P
+.SS CONFIGURATION
+The daemon can be configured by using a configuration file (typically /etc/sshutout.conf)
+and/or using command line options. The command line options are as follows:
+.TP
+.B -2
+Use the defaults for the sshd2 daemon. Currently, this sets the ssh_daemon to "sshd2" and the sshd_log_file
+to "/var/log/secure"
+.TP
+.B -D
+Do not daemonize, i.e. run as a normal process attached to a terminal.
+.TP
+.BI "-d " "delay_penalty"
+Takes a numeric argument giving the number of seconds to block the attacking host
+at the firewall.
+.TP
+.B -e
+Turns off auto whitelisting of default route and name servers.
+.TP
+.BR "-f " "\fIsshd_log_file\fP"
+Requires an argument specifying the path to the input log file, typically one of:
+.P
+.ti 2i
+/var/log/messages [default]
+.ti 2i
+/var/log/secure
+.ti 2i
+/var/log/auth.log
+.TP
+.BI "-i " "polling_interval"
+Takes a numeric argument specifying the polling_interval which determines how often the
+the sshd_log_file is sampled for attack signatures.
+.TP
+.BR "-l " "\fIsshd_log_file\fP"
+Requires an argument specifying a path name to the input log file (sshd_log_file)
+that is scanned for attack signatures.
+.TP
+.B -P
+Enables the option to block probes of the sshd port, i.e. block hosts which cause the ssh daemon
+to log these types of messages:
+.P
+.ti 2i
+"Did not receive identification string from..."
+.TP
+.BR "-p " "\fIpid_file\fP"
+Requires an argument specifying an alternate path to the output PID file where the Process
+ID number is stored. The default PID file is:
+.P
+.ti 2i
+/var/run/sshutout.pid
+.TP
+.BR "-s " "\fIsshutout_log_file\fP"
+Requires an argument specifying an alternate path to the output log file. The default
+log file is:
+.P
+.ti 2i
+/var/log/sshutout.log
+.TP
+.BI "-t " "threshold"
+Takes a numeric argument specifying the threshold value for the number of failed login attempts
+that will trigger a blocking rule at the firewall.
+.TP
+.B -u
+Turn on sensitivity to "Illegal/Invalid user" attempts.
+.TP
+.BI "-w " "host[,host]..."
+Takes a comma separated list of one or more hosts specified either as a resolvable host name or,
+more preferably, in IPv4 dotted quad notation.
+Specified hosts are added to the whitelist of host addresses that are exempt from firewall blocking.
+.TP
+.B -?
+Help.
+Give a brief description of the command syntax.
+.SS CONFIGURATION FILE
+A sample configuration file (typically found at /etc/sshutout.conf) is shown below:
+.P
+.nf
+
+-----------------<<< CUT >>>-------------------
+
+# Sample configuration file for the sshutout daemon.
+# The (commented out) values shown below are
+# the defaults if not specifically overridden
+# in the configuration file or on the 
+# command line.
+
+# The polling interval is given in seconds and determine how often
+# the ssh log is examined. Range 30 - 300
+
+#polling_interval = 60
+
+# The delay penalty is given in seconds and specifies how long the
+# firewall rule should remain effective. Range 60 - 86400
+
+#delay_penalty = 300
+
+# The threshold value gives how many failed login attempts will trigger a
+# block at the firewall. Value >= 3
+
+#threshold = 4
+
+# The following parameter gives the name of the file that is scanned for
+# ssh login attempts. Typical values are:
+#
+#     /var/log/messages  (default)
+#     /var/log/secure
+#     /var/log/auth.log
+#
+# Consult your Linux distribution for the correct setting.
+
+#sshd_log_file = /var/log/messages
+
+# The next parameter gives the name of the file where attacker
+# IP addresses are logged.
+
+#sshutout_log_file = /var/log/sshutout.log
+
+# This parameter gives the name of the ssh daemon that we are
+# monitoring. Openssh names its daemon, "sshd", while
+# ssh.com's daemon is named, "sshd2" 
+# Legal values are restricted to sshd or sshd2
+
+#ssh_daemon = sshd
+
+# The sshutout daemon process' PID is stored in this file.
+
+#pid_file = /var/run/sshutout.pid
+
+# The whitelist value is specified as a comma separated list of IPv4
+# addresses (dotted quad or host name) which will be ignored by
+# the daemon, i.e. they are never firewalled by the daemon.
+# During normal operation, the default route, name servers, and
+# addresses of all active interfaces are automatically part
+# of this whitelist, so they don't need to be specified here. 
+# Example: whitelist = 12.13.14.15, 120.20.101.30, slashdot.org 
+
+#whitelist = 
+
+# Enabled by default, this parameter automatically whitelists 
+# the default gateway and name servers.
+# Valid values (case insensitive):
+#	y, n, yes, no, 1, 0, t, f, true, false, on, off
+
+#auto_whitelist = yes
+
+# Should we firewall portscans seen by ssh daemon, 
+# i.e. those hosts whose probes leave those 
+# "Did not receive identification string from..." messages? (default no)
+# Valid values (case insensitive):
+#	y, n, yes, no, 1, 0, t, f, true, false, on, off
+
+#squelch_portscan = no
+
+# Should we monitor and count "Illegal user" or "Invalid user" attempts
+# as well as failed logins? Valid values (case insensitive):
+#	y, n, yes, no, 1, 0, t, f, true, false, on, off
+
+#illegal_user = no
+
+-----------------<<< CUT >>>-------------------
+.P
+.SH ENVIRONMENT
+\fBsshutout\fP is written to run as a daemon process within a GNU/Linux environment and assumes that it has
+superuser authority. It also assumes that the machine has been configured to use
+iptables as its firewall. Finally, the daemon will attempt to locate the \fBiptables\fP and \fBifconfig\fP
+commands as it makes use of these during its operations.
+.SH FILES
+.nf
+iptables
+ifconfig
+/proc/net/route
+/etc/resolv.conf
+/etc/sshutout.conf
+/var/run/sshutout.pid
+/var/log/sshutout.log
+/var/log/messages
+/var/log/secure
+/var/log/auth.log
+.SH SEE ALSO
+sshd(8), iptables(8), ifconfig(8)
+.SH AUTHOR
+.nf
+Bill DuPree
+bdupree@techfinesse.com
+.SH BUGS
+Probably.
