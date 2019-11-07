@@ -40,7 +40,7 @@ install: sshutout
 	chown root:root /etc/sshutout.conf
 	chmod 640 /etc/sshutout.conf
 	if [ ! -d /usr/man/man8 ]; then mkdir -m 755 /usr/man/man8; fi
-	cp sshutout.8 /usr/man/man8/sshutout.8
+	cp man/sshutout.8 /usr/man/man8/sshutout.8
 	chown root:root /usr/man/man8/sshutout.8
 	chmod 644 /usr/man/man8/sshutout.8
 
