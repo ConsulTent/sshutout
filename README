@@ -9,25 +9,16 @@ Finally, there is a wealth of doc in sshutout.html. Point your browser at
 it.
 
 
-<div id="frm">
+sshutout <!-- body { font-family: "Arial","Dom Casual","Sans Serif", sans-serif; font-size: 11pt; font-weight: normal; font-style: normal; line-height: normal; color: #000000; background-color: #FFFFFF } a:link { color: #0011FF } a:active { color: #FF0000 } a:visited { color: #996600 } h1 { font-size: 18pt; line-height: normal; text-align: left; font-weight: bold } h2 { font-size: 16pt; line-height: normal; font-weight: bold } h3 { font-size: 14pt; line-height: normal; font-weight: bold } table { border: 1px solid black; border-collapse: collapse; background-color: #FFFFFF } .nobd { border: 0px; background-color: #EEEEEE } th { font-size: 11pt; border: 1px solid black; background-color: #CCCCCC; text-align: center; padding-left: 5px; padding-right: 5px; line-height: normal } td { font-size: 11pt; border: 1px solid black; padding-left: 5px; padding-right: 5px; text-align: center; line-height: normal; } .lf { text-align: left } tr { padding-top: 2px } p { color: black; font-size: 12pt; text-indent: 4% } .noindent { color: black; font-size: 12pt; text-indent: 0% } #frm { border: 1px solid black; width: 640px; margin: auto; background-color: #EEEEEE; padding-top: 15px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px } -->
 
 ### sshutout - A Daemon to Stop SSH Dictionary Attacks
 
-<table class="nobd" cellspacing="0" width="95%">
-
-<tbody>
-
-<tr>
-
-<td style="text-align: left; vertical-align: top; width: 50%; padding-left: 0px; border: 0px" width="50%"><span style="font-size: 13pt;">Author: [Bill DuPree](mailto:bdupree@techfinesse.com)  
-Name: sshutout.c  
-Version: 1.0.6 (2009-12-05)  
-Language: C  
-Inception: April 29, 2006  
-License: GPL  
-</span></td>
-
-<td style="border: 0px; text-align: left; vertical-align: top;">
+Author: [Bill DuPree](mailto:bdupree@techfinesse.com)
+Name: sshutout.c
+Version: 1.0.6 (2009-12-05)
+Language: C
+Inception: April 29, 2006
+License: GPL
 
 *   [Introduction](#intro)
 *   [Description of Algorithm](#desc)
@@ -38,15 +29,7 @@ License: GPL
 *   [License](#license)
 *   [Contact](#contact)
 
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-**<a name="intro"></a>Introduction:**
+**Introduction:**
 
 This is a Linux daemon, written in C, that periodically monitors log files looking for multiple failed login attempts via the Secure Shell daemon (sshd, or optionally, sshd2). The daemon is meant to mitigate what are commonly known as "dictionary attacks," i.e. scripted brute force attacks that use lists of user ID's and passwords to effect unauthorized intrusions. Typically such attacks fill the system logs with hundreds or even thousands of log entries for the failed login attempts. Aside from the nuisance of wasted space, wasted bandwidth, and reduced signal to noise ratio in the logs, the attacks can pose a real danger to systems with weak ID and password combinations.
 
@@ -54,9 +37,9 @@ The sshutout daemon blunts such attacks by creating firewall rules to block indi
 
 While sshutout can help reduce the severity and impact of dictionary attacks, it is by no means a substitute for a good password policy. A password policy is the front line of defense against intrusion and should be given careful consideration. The sshutout daemon is merely one small tool intended to help reduce log clutter and diminish the incentive to mount dictionary attacks.
 
-**<a name="desc"></a>Description of Algorithm:**
+**Description of Algorithm:**
 
-The sshutout algorithm follows a pretty standard model for *nix daemons. The program starts, assumes a fairly safe set of built-in default values, then consults an optional configuration file to further refine these values, and finally consults the command line for arguments specifying overrides. The program checks to see that it has the required superuser authority and then forks. Its newly forked daemon process detaches from the console; the original process terminates.
+The sshutout algorithm follows a pretty standard model for \*nix daemons. The program starts, assumes a fairly safe set of built-in default values, then consults an optional configuration file to further refine these values, and finally consults the command line for arguments specifying overrides. The program checks to see that it has the required superuser authority and then forks. Its newly forked daemon process detaches from the console; the original process terminates.
 
 Next, an initial whitelist is constructed from the addresses of all active network interfaces. In addition, the name servers and default route are added to this whitelist. Finally, host addresses specified in the configuration file or command line are appended to the list.
 
@@ -66,108 +49,86 @@ After signal handling has been initialized, the daemon enters its main processin
 
 The daemon's next action is to determine whether its polling interval has elapsed. If it has not yet elapsed, then the daemon goes back to sleep. If the interval has elapsed, then the daemon examines the host's configuration to see if any changes are required to the whitelist, for example, if any new interfaces have come up, or if the addresses associated with any interfaces have changed, etc. Next, the daemon will examine the specified log file to look for failed login attempts. It tallies a count of all failed login attempts for each unique host address over the span of the given polling interval. Those tallies that exceed the specified threshold are moved to the list of blocked hosts (unless, of course, they are in the whitelist.) Each item added to the blocked list is also blocked at the firewall through the addition of a suitable rule. This processing continues indefinitely until the daemon is signaled to stop.
 
-**<a name="inst"></a>Installation:**
+**Installation:**
 
 The sshutout daemon is fairly simple to install provided you have a GCC toolchain that is suitable for building binaries for your target system. To build the binary, run the following commands:
 
-<div style="width: 90%; margin: auto;"><span style="font-family: &quot;courier new&quot;,courier,monospace; font-size: 9pt; line-height: normal">
-
-<pre>$ su -
+$ su -
 # tar -xzvf sshutout-1.0.6.tar.gz
 # cd sshutout-1.0.6
 # make
 # make install
-</pre>
-
-</span></div>
 
 The installation process will place three new files onto your system. These are:
 
-<div style="width: 90%; margin: auto;"><span style="font-family: &quot;courier new&quot;,courier,monospace; font-size: 9pt; line-height: normal">
-
-<pre>/usr/local/sbin/sshutout
+/usr/local/sbin/sshutout
 /usr/man/man8/sshutout.8
 /etc/sshutout.conf
-</pre>
-
-</span></div>
 
 The first file is the executable binary for the daemon. The second file is a man page, and the third file is a sample configuration file. These three files may be copied to other systems as needed to effect additional installations assuming the processor architecture and object libraries are compatible.
 
 To complete the installation, you will need to edit your system startup scripts and add a line or two to invoke the **sshutout** daemon. For example, insert the following lines just after the invocation of sshd:
 
-<div style="width: 90%; margin: auto;"><span style="font-family: &quot;courier new&quot;,courier,monospace; font-size: 9pt; line-height: normal">
-
-<pre>if [ -x /usr/local/sbin/sshutout ]; then
-   rm -f /var/run/sshutout.pid
-   /usr/local/sbin/sshutout
+if \[ -x /usr/local/sbin/sshutout \]; then
+ rm -f /var/run/sshutout.pid
+ /usr/local/sbin/sshutout
 fi
-</pre>
 
-</span></div>
+You should also customize the configuration file: "/etc/sshutout.conf" to reflect your target system's particular needs. It is especially important to make sure that the **sshd\_log\_file** parameter is set to the proper path (see the table in the [Download](#download) section for hints.) After customization, you may either invoke sshutout directly (as root), or you may reboot your system.
 
-You should also customize the configuration file: "/etc/sshutout.conf" to reflect your target system's particular needs. It is especially important to make sure that the **sshd_log_file** parameter is set to the proper path (see the table in the [Download](#download) section for hints.) After customization, you may either invoke sshutout directly (as root), or you may reboot your system.
-
-**<a name="prog"></a>Program Invocation:**
+**Program Invocation:**
 
 This program is a system daemon that is intended to be run from the server startup scripts. It has the following usage:
 
-<div style="background-color: #ffffff; padding: 3px;"><span style="font-family: &quot;courier new&quot;,courier,monospace; font-size: 9pt; line-height: normal">
-
-<pre># sshutout -?
+\# sshutout -?
 sshutout ver. 1.0.6 -- (C)Copyright 2009 - Bill DuPree
 All rights reserved.
 
 Usage:
-        sshutout [-d delay] [-f config_file] [-i poll_interval]
-                 [-l input_log_file] [-p pid_file] [-s output_log_file]
-                 [-t threshold] [-w host_list] [-?] [-2] [-D] [-e] [-u]
+      sshutout \[-d delay\] \[-f config\_file\] \[-i poll\_interval\]
+               \[-l input\_log\_file\] \[-p pid\_file\] \[-s output\_log\_file\]
+               \[-t threshold\] \[-w host\_list\] \[-?\] \[-2\] \[-D\] \[-e\] \[-u\]
 Where:
-  -?  Gives this help message
-  -2  Specifies that defaults for the sshd2 daemon are assumed
-  -D  Means do not run as a daemon.
-  -d  Takes a numeric value giving the number of seconds to firewall attackers
-  -e  Turns off auto whitelisting of default route and name servers
-  -f  Takes an alternate file name for the input configuration file
-  -i  Takes a numeric value giving the polling interval in seconds
-  -l  Takes an alternate file name for the input log file
-  -P  Firewall IP addresses doing port scans
-  -p  Takes an alternate file name for the output PID file
-  -s  Takes an alternate file name for the output log file
-  -t  Takes a numeric threshold value for firewalling failed login attempts
-  -u  Turn on sensitivity to "Illegal/Invalid user" attempts
-  -w  Takes a comma separated list of whitelisted host addresses
-</pre>
-
-</span></div>
+-?  Gives this help message
+-2  Specifies that defaults for the sshd2 daemon are assumed
+-D  Means do not run as a daemon.
+-d  Takes a numeric value giving the number of seconds to firewall attackers
+-e  Turns off auto whitelisting of default route and name servers
+-f  Takes an alternate file name for the input configuration file
+-i  Takes a numeric value giving the polling interval in seconds
+-l  Takes an alternate file name for the input log file
+-P  Firewall IP addresses doing port scans
+-p  Takes an alternate file name for the output PID file
+-s  Takes an alternate file name for the output log file
+-t  Takes a numeric threshold value for firewalling failed login attempts
+-u  Turn on sensitivity to "Illegal/Invalid user" attempts
+-w  Takes a comma separated list of whitelisted host addresses
 
 A sample configuration file is shown below. The sample shows all configurable parameters and their default settings. As is typical, a pound sign, i.e. a '#' character, introduces comment information. In other words, anything on a line following the pound sign is ignored. (As such, please note that all parameter lines are commented out in this sample file.) Blank lines and white space may be used as desired for clarity and aesthetics. All parameter lines follow the form:
 
-<parameter_name> = <parameter_value>
+<parameter\_name> = <parameter\_value>
 
 The configuration file, if it exists, is normally found at the path:
 
 **/etc/sshutout.conf**
 
-but you may override the default location by using the **-f** option on the command line during program invocation.
+but you may override the default location by using the **\-f** option on the command line during program invocation.
 
-<div style="background-color: #ffffff; padding: 3px;"><span style="font-family: &quot;courier new&quot;,courier,monospace; font-size: 9pt; line-height: normal">
-
-<pre># Sample configuration file for the sshutout daemon.
+\# Sample configuration file for the sshutout daemon.
 # The (commented out) values shown below are
 # the defaults if not specifically overridden
-# in the configuration file or on the 
+# in the configuration file or on the
 # command line.
 
 # The polling interval is given in seconds and determine how often
 # the ssh log is examined. Range 30 - 300
 
-#polling_interval = 60
+#polling\_interval = 60
 
 # The delay penalty is given in seconds and specifies how long the
 # firewall rule should remain effective. Range 60 - 86400
 
-#delay_penalty = 300
+#delay\_penalty = 300
 
 # The threshold value gives how many failed login attempts will trigger a
 # block at the firewall. Value >= 3
@@ -183,67 +144,62 @@ but you may override the default location by using the **-f** option on the comm
 #
 # Consult your Linux distribution for the correct setting.
 
-#sshd_log_file = /var/log/messages
+#sshd\_log\_file = /var/log/messages
 
 # The next parameter gives the name of the file where attacker
 # IP addresses are logged.
 
-#sshutout_log_file = /var/log/sshutout.log
+#sshutout\_log\_file = /var/log/sshutout.log
 
 # This parameter gives the name of the ssh daemon that we are
 # monitoring. Openssh names its daemon, "sshd", while
-# ssh.com's daemon is named, "sshd2" 
+# ssh.com's daemon is named, "sshd2"
 # Legal values are restricted to sshd or sshd2
 
-#ssh_daemon = sshd
+#ssh\_daemon = sshd
 
 # The sshutout daemon process' PID is stored in this file.
 
-#pid_file = /var/run/sshutout.pid
+#pid\_file = /var/run/sshutout.pid
 
 # The whitelist value is specified as a comma separated list of IPv4
 # addresses (dotted quad or host name) which will be ignored by
 # the daemon, i.e. they are never firewalled by the daemon.
 # During normal operation, the default route, name servers, and
 # addresses of all active interfaces are automatically part
-# of this whitelist, so they don't need to be specified here. 
-# Example: whitelist = 12.13.14.15, 120.20.101.30, techfinesse.com 
+# of this whitelist, so they don't need to be specified here.
+# Example: whitelist = 12.13.14.15, 120.20.101.30, techfinesse.com
 
-#whitelist = 
+#whitelist =
 
-# Enabled by default, this parameter automatically whitelists 
+# Enabled by default, this parameter automatically whitelists
 # the default gateway and name servers.
 # Valid values (case insensitive):
 #	y, n, yes, no, 1, 0, t, f, true, false, on, off
 
-#auto_whitelist = yes
+#auto\_whitelist = yes
 
-# Should we firewall portscans seen by ssh daemon, 
-# i.e. those hosts whose probes leave those 
+# Should we firewall portscans seen by ssh daemon,
+# i.e. those hosts whose probes leave those
 # "Did not receive identification string from..." messages? (default no)
 # Valid values (case insensitive):
 #	y, n, yes, no, 1, 0, t, f, true, false, on, off
 
-#squelch_portscan = no
+#squelch\_portscan = no
 
 # Should we monitor and count "Illegal user" or "Invalid user" attempts
 # as well as failed logins? Valid values (case insensitive):
 #	y, n, yes, no, 1, 0, t, f, true, false, on, off
 
-#illegal_user = no
-</pre>
+#illegal\_user = no
 
-</span></div>
+A sample invocation is shown below to illustrate command line usage. In this example the **\-i** option is employed to explicitly set the polling interval to 30 seconds, the **\-d** option is used to override the default penalty with a value of 900 seconds, the **\-t** option is used to set the threshold to 3 attempts, and the **\-P** option is invoked to enable squelching of hosts that scan the ssh port.
 
-A sample invocation is shown below to illustrate command line usage. In this example the **-i** option is employed to explicitly set the polling interval to 30 seconds, the **-d** option is used to override the default penalty with a value of 900 seconds, the **-t** option is used to set the threshold to 3 attempts, and the **-P** option is invoked to enable squelching of hosts that scan the ssh port.
-
-<div style="background-color: #ffffff; padding: 3px;"><span style="font-family: &quot;courier new&quot;,courier,monospace; font-size: 9pt; line-height: normal">
-
-<pre># sshutout -i 30 -d 900 -t 3 -P
+\# sshutout -i 30 -d 900 -t 3 -P
 sshutout ver. 1.0.6 -- (C)Copyright 2009 - Bill DuPree
 All rights reserved.
 
-*** The sshutout 1.0.6 daemon has started ***
+\*\*\* The sshutout 1.0.6 daemon has started \*\*\*
 sshutout configuration follows:
 Configuration file: /etc/sshutout.conf
 SSH Daemon: sshd
@@ -256,250 +212,151 @@ Delay penalty: 900 seconds
 Portscan squelching is enabled
 Illegal/Invalid user squelching is disabled
 Whitelist:
-  12.127.16.83
-  12.127.17.83
-  192.168.1.1
-  127.0.0.1
-  192.168.1.222
-</pre>
-
-</span></div>
+12.127.16.83
+12.127.17.83
+192.168.1.1
+127.0.0.1
+192.168.1.222
 
 To have the daemon reload the configuration file, which is especially useful for changing operational parameters "on the fly," it is a simple matter to execute, as root, the command:
 
-<div style="width: 90%; margin: auto;"><span style="font-family: &quot;courier new&quot;,courier,monospace; font-size: 9pt; line-height: normal">kill -s SIGHUP `cat /var/run/sshutout.pid`</span></div>
+kill -s SIGHUP \`cat /var/run/sshutout.pid\`
 
-**<a name="changes"></a>Change Log:**
+**Change Log:**
 
-<div style="border: 0px; width: 90%; margin-left: 5%;">
+Revision
 
-<table width="100%" cellpadding="2px" cellspacing="0">
+Date
 
-<tbody>
+Initial
 
-<tr>
+Description
 
-<th>Revision</th>
+1.0.0
 
-<th>Date</th>
+2006-05-30
 
-<th>Initial</th>
+WD
 
-<th>Description</th>
+Initial release
 
-</tr>
+1.0.1
 
-<tr>
+2006-06-12
 
-<td class="lf">1.0.0</td>
+WD
 
-<td class="lf">2006-05-30</td>
+Fixed crash caused by "Did not receive identification string from UNKNOWN" messages
 
-<td class="lf">WD</td>
+1.0.2
 
-<td class="lf">Initial release</td>
+2006-06-18
 
-</tr>
+WD
 
-<tr>
+Fix to get actual default route as opposed to first gateway encountered in routing table. (Many thanks to Hansj�rg Wenger!) Added option to disable/enable automatic whitelisting of default gw and name servers.
 
-<td class="lf">1.0.1</td>
+1.0.3
 
-<td class="lf">2006-06-12</td>
+2006-06-28
 
-<td class="lf">WD</td>
+WD
 
-<td class="lf">Fixed crash caused by "Did not receive identification string from UNKNOWN" messages</td>
+Added -u option to turn on sensitivity to "Illegal user" attempts.
 
-</tr>
+1.0.4
 
-<tr>
+2007-11-08
 
-<td class="lf">1.0.2</td>
+WD
 
-<td class="lf">2006-06-18</td>
+Made -u option sensitive to "Invalid user" attempts as well. (Thanks to Peter McClure!)
 
-<td class="lf">WD</td>
+1.0.5
 
-<td class="lf">Fix to get actual default route as opposed to first gateway encountered in routing table. (Many thanks to Hansj�rg Wenger!) Added option to disable/enable automatic whitelisting of default gw and name servers.</td>
+2007-12-30
 
-</tr>
+WD
 
-<tr>
+Fixed -u option (ashamedly wearing paper bag on head) Thanks to Ralph Slooten!
 
-<td class="lf">1.0.3</td>
+1.0.6
 
-<td class="lf">2006-06-28</td>
+2007-12-05
 
-<td class="lf">WD</td>
+WD
 
-<td class="lf">Added -u option to turn on sensitivity to "Illegal user" attempts.</td>
+Added detection for "UNKNOWN USER", larger config file line buffer, and corrected open() calls. (Thanks to Michael Shigorin & A.Kitouwaykin at ALT Linux)
 
-</tr>
-
-<tr>
-
-<td class="lf">1.0.4</td>
-
-<td class="lf">2007-11-08</td>
-
-<td class="lf">WD</td>
-
-<td class="lf">Made -u option sensitive to "Invalid user" attempts as well. (Thanks to Peter McClure!)</td>
-
-</tr>
-
-<tr>
-
-<td class="lf">1.0.5</td>
-
-<td class="lf">2007-12-30</td>
-
-<td class="lf">WD</td>
-
-<td class="lf">Fixed -u option (ashamedly wearing paper bag on head) Thanks to Ralph Slooten!</td>
-
-</tr>
-
-<tr>
-
-<td class="lf">1.0.6</td>
-
-<td class="lf">2007-12-05</td>
-
-<td class="lf">WD</td>
-
-<td class="lf">Added detection for "UNKNOWN USER", larger config file line buffer, and corrected open() calls. (Thanks to Michael Shigorin & A.Kitouwaykin at ALT Linux)</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
-
-**<a name="download"></a>Download:**
+**Download:**
 
 The following archive contains the complete C source code for the sshutout daemon, a Makefile, and some ancillary documentation.
 
-Ver. 1.0.6 Compressed Tar (gzip): [Download](http://www.techfinesse.com/tiki/tiki-list_file_gallery.php?galleryId=2)  
+Ver. 1.0.6 Compressed Tar (gzip): [Download](http://www.techfinesse.com/tiki/tiki-list_file_gallery.php?galleryId=2)
 
 The code is specific to GNU/Linux based operating systems and was developed and tested using GCC 3.3.6 on Slackware Linux 10.2 running in an x86 environment. Simple remakes are known to run on:
 
-<div style="border: 0px; width: 90%; margin-left: 5%;">
+Linux Distribution
 
-<table width="100%" cellpadding="2px" cellspacing="0">
+Log File Used
 
-<tbody>
+Processor Architecture
 
-<tr>
+[CentOS 5.4](http://www.centos.org) ([Red Hat](http://www.redhat.com) variant)
 
-<th width="50%">Linux Distribution</th>
+/var/log/secure
 
-<th width="27%">Log File Used</th>
+x86
 
-<th width="23%">Processor Architecture</th>
+[BLAG 30003](http://www.blagblagblag.org) (Red Hat [Fedora](http://www.redhat.com/fedora/) variant)
 
-</tr>
+/var/log/secure
 
-<tr>
+x86
 
-<td class="lf">[CentOS 5.4](http://www.centos.org) ([Red Hat](http://www.redhat.com) variant)</td>
+[Debian 3.1](http://www.debian.org) "sarge"
 
-<td class="lf">/var/log/secure</td>
+/var/log/auth.log
 
-<td class="lf">x86</td>
+Alpha AXP
 
-</tr>
+[kubuntu 5.10](http://www.kubuntu.org) (Debian variant)
 
-<tr>
+/var/log/auth.log
 
-<td class="lf">[BLAG 30003](http://www.blagblagblag.org) (Red Hat [Fedora](http://www.redhat.com/fedora/) variant)</td>
+x86
 
-<td class="lf">/var/log/secure</td>
+[SuSE 9.1](http://www.novell.com/linux/)
 
-<td class="lf">x86</td>
+/var/log/messages
 
-</tr>
+x86
 
-<tr>
+[OpenSUSE 10.1](http://en.opensuse.org/Welcome_to_openSUSE.org)
 
-<td class="lf">[Debian 3.1](http://www.debian.org) "sarge"</td>
+/var/log/messages
 
-<td class="lf">/var/log/auth.log</td>
+x86
 
-<td class="lf">Alpha AXP</td>
+[Slackware 10.x](http://www.slackware.com)
 
-</tr>
+/var/log/messages
 
-<tr>
+x86
 
-<td class="lf">[kubuntu 5.10](http://www.kubuntu.org) (Debian variant)</td>
+[Yellow Dog Linux 4](http://www.terrasoftsolutions.com) (Red Hat variant)
 
-<td class="lf">/var/log/auth.log</td>
+/var/log/secure
 
-<td class="lf">x86</td>
+PowerPC
 
-</tr>
+[Slamd64 10.2b](http://www.slamd64.com) (Slackware variant)
 
-<tr>
+/var/log/messages
 
-<td class="lf">[SuSE 9.1](http://www.novell.com/linux/)</td>
+x86\_64
 
-<td class="lf">/var/log/messages</td>
-
-<td class="lf">x86</td>
-
-</tr>
-
-<tr>
-
-<td class="lf">[OpenSUSE 10.1](http://en.opensuse.org/Welcome_to_openSUSE.org)</td>
-
-<td class="lf">/var/log/messages</td>
-
-<td class="lf">x86</td>
-
-</tr>
-
-<tr>
-
-<td class="lf">[Slackware 10.x](http://www.slackware.com)</td>
-
-<td class="lf">/var/log/messages</td>
-
-<td class="lf">x86</td>
-
-</tr>
-
-<tr>
-
-<td class="lf">[Yellow Dog Linux 4](http://www.terrasoftsolutions.com) (Red Hat variant)</td>
-
-<td class="lf">/var/log/secure</td>
-
-<td class="lf">PowerPC</td>
-
-</tr>
-
-<tr>
-
-<td class="lf">[Slamd64 10.2b](http://www.slamd64.com) (Slackware variant)</td>
-
-<td class="lf">/var/log/messages</td>
-
-<td class="lf">x86_64</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
-
-**<a name="license"></a>License:**
+**License:**
 
 This program is free software; you can redistribute it and/or modify it under the terms of version 2 of the GNU General Public License as published by the Free Software Foundation.
 
@@ -507,9 +364,9 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-**<a name="contact"></a>Contact:**
+**Contact:**
 
-Email: [Bill DuPree](mailto:bdupree@techfinesse.com) (bdupree_AT_techfinesse_DOT_com)  
+Email: [Bill DuPree](mailto:bdupree@techfinesse.com) (bdupree\_AT\_techfinesse\_DOT\_com)
 Post: Bill DuPree, 609 Wenonah Ave, Oak Park, IL 60304 USA
 
-<span style="font-size: 9pt;">Copyright © 2009, Bill DuPree. All rights reserved.</span></div>
+Copyright © 2009, Bill DuPree. All rights reserved.
